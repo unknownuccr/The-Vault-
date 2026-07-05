@@ -1,0 +1,87 @@
+{% extends '_layout_app.html' %}
+{% from '_icons.html' import icon %}
+
+{% block title %}Vault{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Vault</h1>
+        <p class="page-sub">
+            {{ entry_count }} {{ 'entry' if entry_count == 1 else 'entries' }} &middot; encrypted at rest
+        </p>
+    </div>
+    <a class="btn btn-ghost" href="{{ url_for('new_entry_page') }}">{{ icon('plus', 15) }} New entry</a>
+</div>
+
+{% if passwords is not defined %}
+<div class="panel unlock-panel">
+    <div class="feature-icon">{{ icon('lock', 18) }}</div>
+    <h2>Vault locked</h2>
+    <p class="card-sub">Enter your master password to decrypt your entries. Nothing is shown until you do.</p>
+    <form action="{{ url_for('vault_unlock') }}" method="post" class="unlock-form">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+        <div class="input-wrap">
+            <input type="password" id="master_password" name="master_password"
+                   placeholder="Master password" autocomplete="current-password" autofocus required>
+            <button type="button" class="icon-btn input-affix" data-toggle-password="master_password" aria-label="Show password">
+                {{ icon('eye', 15) }}{{ icon('eye-off', 15) }}
+            </button>
+        </div>
+        <button type="submit" class="btn btn-primary">{{ icon('unlock', 15) }} Unlock</button>
+    </form>
+</div>
+
+{% elif passwords|length == 0 %}
+<div class="panel unlock-panel">
+    <div class="feature-icon">{{ icon('database', 18) }}</div>
+    <h2>Nothing here yet</h2>
+    <p class="card-sub">Your vault is unlocked but empty. Save your first login to get started.</p>
+    <a class="btn btn-primary" href="{{ url_for('new_entry_page') }}">{{ icon('plus', 15) }} New entry</a>
+</div>
+
+{% else %}
+<div class="vault-toolbar">
+    <div class="input-wrap search-wrap">
+        <span class="input-affix input-affix-left">{{ icon('search', 15) }}</span>
+        <input type="search" id="vault-search" placeholder="Filter entries&hellip;" autocomplete="off">
+    </div>
+    <span class="vault-toolbar-note">{{ icon('unlock', 13) }} Unlocked — locks again when you leave this page</span>
+</div>
+
+<div class="panel vault-list" id="vault-list">
+    {% for entry in passwords %}
+    <div class="vault-row" data-site="{{ entry.site|lower }}">
+        <span class="site-avatar">{{ entry.site[:1]|upper }}</span>
+        <span class="vault-site">{{ entry.site }}</span>
+        {% if entry.password is not none %}
+        <code class="vault-secret" data-secret="{{ entry.password }}">••••••••••••</code>
+        <div class="vault-actions">
+            <button type="button" class="icon-btn" data-reveal aria-label="Show password" title="Show">
+                {{ icon('eye', 15) }}{{ icon('eye-off', 15) }}
+            </button>
+            <button type="button" class="icon-btn" data-copy-secret aria-label="Copy password" title="Copy">
+                {{ icon('copy', 15) }}{{ icon('check', 15) }}
+            </button>
+            <form action="{{ url_for('vault_delete') }}" method="post" data-confirm="Delete the entry for “{{ entry.site }}”? This cannot be undone.">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="id" value="{{ entry.id }}">
+                <button type="submit" class="icon-btn icon-btn-danger" aria-label="Delete entry" title="Delete">{{ icon('trash', 15) }}</button>
+            </form>
+        </div>
+        {% else %}
+        <span class="vault-secret vault-secret-error">{{ icon('alert', 13) }} can't decrypt — saved under a different master password</span>
+        <div class="vault-actions">
+            <form action="{{ url_for('vault_delete') }}" method="post" data-confirm="Delete the entry for “{{ entry.site }}”? This cannot be undone.">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="id" value="{{ entry.id }}">
+                <button type="submit" class="icon-btn icon-btn-danger" aria-label="Delete entry" title="Delete">{{ icon('trash', 15) }}</button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+    <p class="vault-no-match" id="vault-no-match" hidden>No entries match your filter.</p>
+</div>
+{% endif %}
+{% endblock %}

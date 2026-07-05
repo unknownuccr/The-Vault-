@@ -1,0 +1,40 @@
+{% extends '_layout_auth.html' %}
+{% from '_icons.html' import icon %}
+
+{% block title %}Create account{% endblock %}
+
+{% block card %}
+<h1 class="card-title">Create your vault</h1>
+<p class="card-sub">One account, one master password, one encrypted vault.</p>
+
+<form action="{{ url_for('register') }}" method="post" class="stack">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+    <div class="field">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" value="{{ username or '' }}"
+               autocomplete="username" autocapitalize="none" spellcheck="false"
+               minlength="3" maxlength="32" pattern="[A-Za-z0-9._\-]+" autofocus required>
+        <p class="field-hint">3–32 characters. Letters, numbers, dots, dashes, underscores.</p>
+    </div>
+    <div class="field">
+        <label for="password">Master password</label>
+        <div class="input-wrap">
+            <input type="password" id="password" name="password"
+                   autocomplete="new-password" minlength="8" required>
+            <button type="button" class="icon-btn input-affix" data-toggle-password="password" aria-label="Show password">
+                {{ icon('eye', 15) }}{{ icon('eye-off', 15) }}
+            </button>
+        </div>
+        <div class="strength" data-strength-for="password">
+            <div class="strength-bars"><i></i><i></i><i></i><i></i></div>
+            <span class="strength-label" data-strength-label></span>
+        </div>
+        <p class="field-hint">At least 8 characters. This encrypts everything — it cannot be recovered if lost.</p>
+    </div>
+    <button type="submit" class="btn btn-primary btn-block">Create account</button>
+</form>
+{% endblock %}
+
+{% block below_card %}
+<p class="auth-alt">Already have a vault? <a href="{{ url_for('login_page') }}">Sign in</a></p>
+{% endblock %}

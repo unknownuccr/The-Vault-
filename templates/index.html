@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% from '_icons.html' import icon %}
+
+{% block title %}Local-first password manager{% endblock %}
+{% block body_class %}landing-page{% endblock %}
+
+{% block shell %}
+<header class="topbar">
+    <div class="topbar-inner">
+        <a class="wordmark" href="{{ url_for('index') }}">
+            <span class="wordmark-mark">{{ icon('lock', 14) }}</span>
+            <span>Vault</span>
+        </a>
+        <div class="topbar-user">
+            <a class="btn btn-ghost btn-sm" href="{{ url_for('login_page') }}">Sign in</a>
+            <a class="btn btn-primary btn-sm" href="{{ url_for('register_page') }}">Create account</a>
+        </div>
+    </div>
+</header>
+
+<main class="landing-main">
+    <section class="hero">
+        <p class="hero-eyebrow">{{ icon('shield', 13) }} Local-first &middot; Encrypted at rest</p>
+        <h1>Keep every password<br>on your own machine.</h1>
+        <p class="hero-sub">
+            Vault is a self-hosted password manager. Entries are encrypted with a key
+            derived from your master password, stored in a single local database,
+            and never sent anywhere.
+        </p>
+        <div class="hero-actions">
+            <a class="btn btn-primary" href="{{ url_for('register_page') }}">Create your vault</a>
+            <a class="btn btn-ghost" href="{{ url_for('login_page') }}">Sign in</a>
+        </div>
+    </section>
+
+    <section class="features">
+        <div class="feature">
+            <div class="feature-icon">{{ icon('lock', 18) }}</div>
+            <h3>Encrypted at rest</h3>
+            <p>Every entry is sealed with a key derived from your master password using PBKDF2 — 600,000 rounds of it.</p>
+        </div>
+        <div class="feature">
+            <div class="feature-icon">{{ icon('key', 18) }}</div>
+            <h3>One master password</h3>
+            <p>Your master password is stored only as a bcrypt hash. It unlocks the vault; it is never written down in full.</p>
+        </div>
+        <div class="feature">
+            <div class="feature-icon">{{ icon('hard-drive', 18) }}</div>
+            <h3>Yours, locally</h3>
+            <p>Everything lives in one SQLite file on this computer. No cloud account, no sync service, no telemetry.</p>
+        </div>
+    </section>
+
+    <footer class="landing-footer">
+        <span>Vault — a personal password manager. Your data stays on this machine.</span>
+    </footer>
+</main>
+{% endblock %}

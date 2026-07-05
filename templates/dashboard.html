@@ -1,0 +1,38 @@
+{% extends '_layout_app.html' %}
+{% from '_icons.html' import icon %}
+
+{% block title %}Overview{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Overview</h1>
+        <p class="page-sub">
+            Signed in as <strong>{{ session.username }}</strong> &middot;
+            {{ entry_count }} {{ 'entry' if entry_count == 1 else 'entries' }} in your vault
+        </p>
+    </div>
+    <a class="btn btn-primary" href="{{ url_for('new_entry_page') }}">{{ icon('plus', 15) }} New entry</a>
+</div>
+
+<div class="action-grid">
+    <a class="action-card" href="{{ url_for('vault') }}">
+        <div class="feature-icon">{{ icon('lock', 18) }}</div>
+        <h3>Open vault</h3>
+        <p>View your saved logins. Your master password is required to decrypt them.</p>
+        <span class="action-card-meta">{{ entry_count }} {{ 'entry' if entry_count == 1 else 'entries' }}</span>
+    </a>
+    <a class="action-card" href="{{ url_for('new_entry_page') }}">
+        <div class="feature-icon">{{ icon('plus', 18) }}</div>
+        <h3>New entry</h3>
+        <p>Save a login. It's encrypted with your master password before it touches disk.</p>
+        <span class="action-card-meta">Encrypted at rest</span>
+    </a>
+    <a class="action-card" href="{{ url_for('generator') }}">
+        <div class="feature-icon">{{ icon('refresh', 18) }}</div>
+        <h3>Generator</h3>
+        <p>Create strong random passwords, generated locally in your browser.</p>
+        <span class="action-card-meta">Never leaves this page</span>
+    </a>
+</div>
+{% endblock %}

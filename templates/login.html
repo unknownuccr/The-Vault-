@@ -1,0 +1,32 @@
+{% extends '_layout_auth.html' %}
+{% from '_icons.html' import icon %}
+
+{% block title %}Sign in{% endblock %}
+
+{% block card %}
+<h1 class="card-title">Sign in</h1>
+<p class="card-sub">Unlock your vault with your master password.</p>
+
+<form action="{{ url_for('login') }}" method="post" class="stack">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+    <div class="field">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" value="{{ username or '' }}"
+               autocomplete="username" autocapitalize="none" spellcheck="false" autofocus required>
+    </div>
+    <div class="field">
+        <label for="password">Master password</label>
+        <div class="input-wrap">
+            <input type="password" id="password" name="password" autocomplete="current-password" required>
+            <button type="button" class="icon-btn input-affix" data-toggle-password="password" aria-label="Show password">
+                {{ icon('eye', 15) }}{{ icon('eye-off', 15) }}
+            </button>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary btn-block">Sign in</button>
+</form>
+{% endblock %}
+
+{% block below_card %}
+<p class="auth-alt">New here? <a href="{{ url_for('register_page') }}">Create a vault</a></p>
+{% endblock %}

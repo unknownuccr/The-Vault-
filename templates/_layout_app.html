@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% from '_icons.html' import icon %}
+
+{% block shell %}
+<header class="topbar">
+    <div class="topbar-inner">
+        <a class="wordmark" href="{{ url_for('dashboard') }}">
+            <span class="wordmark-mark">{{ icon('lock', 14) }}</span>
+            <span>Vault</span>
+        </a>
+        <nav class="topbar-nav">
+            <a href="{{ url_for('dashboard') }}" class="{{ 'active' if request.endpoint == 'dashboard' }}">Overview</a>
+            <a href="{{ url_for('vault') }}" class="{{ 'active' if request.endpoint in ('vault', 'vault_unlock', 'new_entry_page', 'new_entry') }}">Vault</a>
+            <a href="{{ url_for('generator') }}" class="{{ 'active' if request.endpoint == 'generator' }}">Generator</a>
+        </nav>
+        <div class="topbar-user">
+            <span class="topbar-username">{{ icon('user', 14) }} {{ session.username }}</span>
+            <a class="btn btn-ghost btn-sm" href="{{ url_for('logout') }}">{{ icon('log-out', 14) }} Sign out</a>
+        </div>
+    </div>
+</header>
+<main class="app-main">
+    {% include '_flash.html' %}
+    {% block content %}{% endblock %}
+</main>
+{% endblock %}

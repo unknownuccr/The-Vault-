@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% from '_icons.html' import icon %}
+
+{% block body_class %}auth-page{% endblock %}
+
+{% block shell %}
+<main class="auth-main">
+    <a class="wordmark wordmark-lg" href="{{ url_for('index') }}">
+        <span class="wordmark-mark">{{ icon('lock', 16) }}</span>
+        <span>Vault</span>
+    </a>
+    {% include '_flash.html' %}
+    <div class="panel auth-card">
+        {% block card %}{% endblock %}
+    </div>
+    {% block below_card %}{% endblock %}
+</main>
+{% endblock %}
