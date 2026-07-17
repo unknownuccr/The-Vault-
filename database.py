@@ -1,8 +1,17 @@
+import os
 import sqlite3
+
+# Anchor the database to the module directory (overridable via VAULT_DB_PATH)
+# so launching from a different working directory can't silently create a
+# fresh, empty users.db instead of opening the real vault.
+DB_PATH = os.environ.get(
+    'VAULT_DB_PATH',
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), 'users.db'),
+)
 
 
 def get_db():
-    conn = sqlite3.connect('users.db')
+    conn = sqlite3.connect(DB_PATH)
     return conn
 
 
