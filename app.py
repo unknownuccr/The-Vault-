@@ -51,9 +51,10 @@ def load_secret_key():
 
 app = Flask(__name__)
 app.secret_key = load_secret_key()
-# Secure cookies default ON (vault handles credentials); set
-# SESSION_COOKIE_SECURE=0 in the environment only for local HTTP development.
-_secure_cookies = os.environ.get('SESSION_COOKIE_SECURE', '1').lower() not in ('0', 'false', 'no')
+# Secure cookies default OFF so the local HTTP vault (http://127.0.0.1:5000)
+# isn't silently locked out — a secure cookie is never sent back over plain
+# HTTP. Set SESSION_COOKIE_SECURE=1 when serving the vault over HTTPS.
+_secure_cookies = os.environ.get('SESSION_COOKIE_SECURE', '0').lower() in ('1', 'true', 'yes')
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE='Lax',

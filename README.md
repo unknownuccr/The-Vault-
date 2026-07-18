@@ -13,7 +13,9 @@ A password manager built with Flask, bcrypt, and SQLite.
   key is derived from your master password with PBKDF2-HMAC-SHA256 (600,000 iterations)
   and a per-user salt, so the key only exists in memory while you're unlocking the vault.
 - **Sessions** — signed with a secret key generated on first run (stored in `.secret_key`,
-  or set the `SECRET_KEY` environment variable). All forms are CSRF-protected.
+  or set the `SECRET_KEY` environment variable). All forms are CSRF-protected. The session
+  cookie is sent over plain HTTP by default so the local vault works out of the box; if you
+  serve the vault over HTTPS, set `SESSION_COOKIE_SECURE=1` to restrict the cookie to TLS.
 - **Generator** — passwords are generated in the browser with `crypto.getRandomValues`;
   they are never sent to the server.
 
