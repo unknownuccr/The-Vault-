@@ -9,8 +9,8 @@ from flask import (
 )
 
 from auth import (
-    add_to_db, check_pass, count_passwords, delete_password, get_passwords,
-    get_user, get_user_salt, hashing_a_pass, save_password,
+    add_to_db, check_pass, count_passwords, delete_password, dummy_check_pass,
+    get_passwords, get_user, get_user_salt, hashing_a_pass, save_password,
     update_password_value,
 )
 from crypto import InvalidToken, decrypt_secret, derive_key, encrypt_secret, is_encrypted
@@ -34,16 +34,31 @@ def load_secret_key():
         with open(key_path) as f:
             return f.read().strip()
     key = secrets.token_hex(32)
-    with open(key_path, 'w') as f:
-        f.write(key)
-    return key
+    # Create the key file exclusively with owner-only permissions so a local
+    # user can't read it and forge session cookies. O_EXCL closes the startup
+    # race where two workers would otherwise both write divergent keys.
+    try:
+        fd = os.open(key_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        try:
+            os.write(fd, key.encode('ascii'))
+        finally:
+            os.close(fd)
+        return key
+    except FileExistsError:
+        with open(key_path) as f:
+            return f.read().strip()
 
 
 app = Flask(__name__)
 app.secret_key = load_secret_key()
+# Secure cookies default OFF so the local HTTP vault (http://127.0.0.1:5000)
+# isn't silently locked out — a secure cookie is never sent back over plain
+# HTTP. Set SESSION_COOKIE_SECURE=1 when serving the vault over HTTPS.
+_secure_cookies = os.environ.get('SESSION_COOKIE_SECURE', '0').lower() in ('1', 'true', 'yes')
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE='Lax',
+    SESSION_COOKIE_SECURE=_secure_cookies,
 )
 init_db()
 
@@ -63,7 +78,7 @@ app.jinja_env.globals['csrf_token'] = csrf_token
 def csrf_protect():
     if request.method == 'POST':
         token = session.get('_csrf_token')
-        if not token or token != request.form.get('_csrf_token'):
+        if not token or not secrets.compare_digest(token, request.form.get('_csrf_token', '')):
             abort(400)
 
 
@@ -102,6 +117,10 @@ def login():
         session.clear()
         session['username'] = username
         return redirect(url_for('dashboard'))
+    if not stored_hash:
+        # Spend comparable time on the no-such-user path so response timing
+        # can't be used to enumerate valid usernames.
+        dummy_check_pass()
     flash('Incorrect username or password.', 'error')
     return render_template('login.html', username=username), 401
 
@@ -259,4 +278,8 @@ def legacy_passwordgen():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Debug mode exposes the Werkzeug interactive debugger (arbitrary code
+    # execution) and leaks tracebacks — never default-on for a credential
+    # vault. Opt in explicitly with FLASK_DEBUG=1 for local development only.
+    debug = os.environ.get('FLASK_DEBUG', '0').lower() in ('1', 'true', 'yes')
+    app.run(debug=debug)

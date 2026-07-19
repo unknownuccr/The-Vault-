@@ -19,6 +19,21 @@ def check_pass(entered_pass, hashed_password):
     return bcrypt.checkpw(attempt_bytes, hash_bytes)
 
 
+# A fixed bcrypt hash (of a random throwaway value) used to spend the same
+# work when a username does not exist, so login timing can't be used to
+# enumerate valid usernames.
+_DUMMY_HASH = bcrypt.hashpw(b'timing-equalizer', bcrypt.gensalt(rounds=12))
+
+
+def dummy_check_pass():
+    """Run a bcrypt verification against a fixed hash and discard the result.
+
+    Called on the no-such-user path so that a present and an absent account
+    take comparable time.
+    """
+    bcrypt.checkpw(b'timing-equalizer-attempt', _DUMMY_HASH)
+
+
 # adds a new account to the users table
 def add_to_db(username, hashed_password):
     conn = get_db()
@@ -34,8 +49,10 @@ def add_to_db(username, hashed_password):
 
 def get_user(username):
     conn = get_db()
-    row = conn.execute('SELECT password FROM users WHERE username = ?', (username,)).fetchone()
-    conn.close()
+    try:
+        row = conn.execute('SELECT password FROM users WHERE username = ?', (username,)).fetchone()
+    finally:
+        conn.close()
     return row[0] if row else None
 
 
@@ -70,18 +87,22 @@ def save_password(username, site_name, saved_password):
 
 def get_passwords(username):
     conn = get_db()
-    rows = conn.execute(
-        'SELECT site_name, saved_password, id FROM passwords WHERE username = ? ORDER BY site_name COLLATE NOCASE',
-        (username,),
-    ).fetchall()
-    conn.close()
+    try:
+        rows = conn.execute(
+            'SELECT site_name, saved_password, id FROM passwords WHERE username = ? ORDER BY site_name COLLATE NOCASE',
+            (username,),
+        ).fetchall()
+    finally:
+        conn.close()
     return rows
 
 
 def count_passwords(username):
     conn = get_db()
-    row = conn.execute('SELECT COUNT(*) FROM passwords WHERE username = ?', (username,)).fetchone()
-    conn.close()
+    try:
+        row = conn.execute('SELECT COUNT(*) FROM passwords WHERE username = ?', (username,)).fetchone()
+    finally:
+        conn.close()
     return row[0]
 
 
