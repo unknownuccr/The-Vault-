@@ -6,6 +6,12 @@ A password manager built with Flask, bcrypt, and SQLite.
 
 **Note** - This project is not meant to be used professionally in any way. 
 
+## Who built what
+
+I designed and built the backend myself, the Flask routes, the SQLite schema, the
+bcrypt/Fernet/PBKDF2 encryption flow, and the overall architecture. AI assisted with
+parts of the frontend (templates/styling). I used AI to check for security flaws and debug things that were not working. the design decisions and the security-critical code are mine.
+
 ## How it protects your data
 
 - **Master password** — stored only as a bcrypt hash (12 rounds). Never saved in plain form.
@@ -34,4 +40,12 @@ re-encrypted the first time you unlock the vault.
 | `/vault/new` | Save a new entry                                 |
 | `/generator` | Client-side password generator                   |
 
+
+# things to watch for/fix
+username enumeration
+weak/guessable passwords (no lockout/rate limits)
+logic flaws in the login/registration flow
+insecure session or cookie handling
+
+AI helped me flag some of these security flaws (username enumeration and the session/cookie handling issues in particular) during review, noted here as things to harden next.
 
