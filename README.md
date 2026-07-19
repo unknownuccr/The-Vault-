@@ -1,6 +1,6 @@
 # The Vault
 
-A password manager built with Flask, bcrypt, and SQLite. 
+A password manager built with Flask, bcrypt, and SQLite by a highschool student in about a week. 
 
 **Last Updated Date** - 7/5/2026
 
@@ -27,6 +27,28 @@ parts of the frontend (templates/styling). I used AI to check for security flaws
 
 Entries saved by older versions of this app (stored in plaintext) are automatically
 re-encrypted the first time you unlock the vault.
+
+## Running it locally
+
+Requires Python 3.11+ and pip.
+
+```
+pip install flask bcrypt cryptography
+python app.py
+```
+
+Then open `http://127.0.0.1:5000` in your browser. On first run the app creates
+`.secret_key` (session signing key) and `users.db` (SQLite database) in the project
+folder, both are gitignored, so they stay local to your machine.
+
+Optional environment variables:
+
+| Variable               | Default | What it does                                              |
+| ---------------------- | ------- | ----------------------------------------------------------- |
+| `SECRET_KEY`           | generated into `.secret_key` | Session signing key. Set this in production instead of relying on the file. |
+| `FLASK_DEBUG`          | off     | Enables Flask's interactive debugger. **Never enable this in production** — it allows arbitrary code execution. |
+| `SESSION_COOKIE_SECURE`| off     | Set to `1` if you serve the vault over HTTPS, to restrict the session cookie to TLS. |
+| `VAULT_DB_PATH`        | `users.db` next to `app.py` | Overrides where the SQLite database lives. |
 
 ## Pages
 
